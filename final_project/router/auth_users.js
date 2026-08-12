@@ -78,30 +78,34 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   });
 });
 
-regd_users.delete("/auth/review/:isbn", (req, res) =>{
-  const isbn = req.params.isbn;
-  const username = req.session.authorization.username;
-  // Vérifier si l'utilisateur est connecté
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+
     if (!req.session.authorization) {
         return res.status(401).json({
             message: "User not logged in"
         });
     }
 
-  if(!books[isbn]){
-    return res.status(404).json({
-      message:"Livre introuvable"
+    const isbn = req.params.isbn;
+    const username = req.session.authorization.username;
+
+    if (!books[isbn]) {
+        return res.status(404).json({
+            message: "Livre introuvable"
+        });
+    }
+
+    if (!books[isbn].reviews[username]) {
+        return res.status(404).json({
+            message: "Revue introuvable"
+        });
+    }
+
+    delete books[isbn].reviews[username];
+
+    return res.status(200).json({
+        message: "Revue supprimée avec succès"
     });
-  }
-  if(!books[isbn].reviews[username]){
-    return res.status(404).json({
-      message:"Revue introuvable"
-    });
-  }
-  delete books[isbn].reviews[username];
-   res.status(200).json({
-    message:"Revue supprimée avec succès"
-   });
 });
 
 module.exports.authenticated = regd_users;
